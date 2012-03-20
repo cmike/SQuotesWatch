@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/stocklist" 
+        android:layout_marginTop="30dp"
+        android:background="#e8e8e8" >
+    <TextView  
+    	android:layout_width="fill_parent" 
+    	android:layout_height="wrap_content" 
+    	android:id="@+id/symbol"
+    	android:textSize="15dp"
+    	android:paddingTop="10dp"
+    	android:paddingLeft="10dp"
+    	android:textColor="#000000"
+     >
+     </TextView> 
+     <TextView  
+    	android:layout_width="fill_parent" 
+    	android:layout_height="wrap_content" 
+    	android:id="@+id/exch"
+    	android:textSize="15dp"
+    	android:paddingTop="10dp"
+    	android:paddingLeft="10dp"
+    	android:layout_marginLeft="250dp"
+    	android:textColor="#000000"
+     ></TextView> 
+</RelativeLayout>
