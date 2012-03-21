@@ -1,5 +1,6 @@
 package com.muustwatch;
 
+import com.muustwatch.datafile.DataFileStorage;
 import com.muustwatch.db.WatchQuotaDBAdapter;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -321,8 +322,12 @@ public class PrtfSymbols extends Activity implements OnClickListener {
 	}
 	@Override
 	public void onDestroy () {
+		unbindService (mConnection);
 		if (s != null)
 			s.stopSelf();
+		
+		if (!MUUDebug.REAL_LOAD)
+			DataFileStorage.Release();
 
 		super.onDestroy();
 	}

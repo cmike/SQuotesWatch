@@ -120,10 +120,10 @@ public class ChkPrice extends Service {
 
 	@Override
 	public void onDestroy() {
-		super.onDestroy();
 		if (timer != null) {
 			timer.cancel();
 		}
+		super.onDestroy();
 		Log.i(getClass().getSimpleName(), "Check Price's Timer stopped.");
 
 	}

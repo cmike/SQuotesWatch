@@ -2,6 +2,9 @@ package com.muustwatch;
 
 import org.json.JSONObject;
 
+import com.muustwatch.datafile.DataFileReader;
+import com.muustwatch.datafile.DataFileStorage;
+
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -50,9 +53,23 @@ public class LoadDeatails implements Runnable {
 	  	_m_handler.sendMessage(result_msg);
 	}
 	
+	private String data_file_load () {
+		String err_msg = null;
+		
+		DataFileReader reader = DataFileStorage.getDataFile(_m_qsymb);
+		
+		if (reader == null)
+			err_msg = "No File Found";
+		else {
+			data_item = new StockDetailData();
+			if (!reader.LoadNextLine(data_item))
+				err_msg = "EOF";
+		}
+		
+		return (err_msg);
+	}
 	
-	@Override
-	public void run() {
+	private String http_load () {
 		String err_msg = null;
 		String YAPI_Body = RequestHead + _m_qsymb + RequestTail;
 		YAPI_Body = prepare (YAPI_Body);
@@ -111,8 +128,19 @@ public class LoadDeatails implements Runnable {
 			err_msg = res;
 		}
 		
-		NotifyCaller(err_msg);
+		return (err_msg);
+	}
+	
+	@Override
+	public void run() {
+		String err_msg = null;
 
+		if (MUUDebug.REAL_LOAD)
+		    err_msg = http_load ();
+		else
+			err_msg = data_file_load ();
+		
+		NotifyCaller(err_msg);
 	}	
 
 }
