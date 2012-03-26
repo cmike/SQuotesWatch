@@ -23,6 +23,11 @@ import android.os.Parcelable;
 public class StockDetailData implements Parcelable {
 	final private String date_format_str = "MM/dd/yy";
 	final private String time_format_pattern = "hh:mm";
+	
+	public static class StockDtlFired {
+		public boolean  UpperToFire = false;
+		public boolean  LowerToFire = false;
+	}
 	private String makeTimeOutputFormat () { return (time_format_pattern + " a"); }
 	@SuppressWarnings("unused")
 	private String makeFullOutputFormat () {
@@ -37,12 +42,55 @@ public class StockDetailData implements Parcelable {
 		return (date_format_str + " " + time_format);
 	}
 	private class MyBound {
+		public static final int AS_UPPER = 1;
+		public static final int AS_LOWER = 2;
+		
+		private boolean fired = false;
 		private Boolean is_defined;
 		private double  value;
 		
 		MyBound () { value = 0.0; is_defined = false;}
 		MyBound (MyBound in) { value = in.value; is_defined = in.is_defined; }
 		
+		@SuppressWarnings("unused")
+		boolean isFired () { return (fired); }
+		boolean CheckAs (double check_against, int check_as) {
+			boolean to_fire = false;
+			
+			if (is_defined) {
+				double delta = check_against - value;
+				
+				if (delta > 0) {
+					if (check_as == AS_UPPER) {
+						if (!fired) {
+							fired   = true;
+							to_fire = true;
+						}
+					} else if (check_as == AS_LOWER) {
+						if (fired) {
+							fired   = false;
+							to_fire = true;
+						}
+					} else
+						throw new Error ("Wrong check_as");
+				} else if (delta < 0) {
+					if (check_as == AS_UPPER) {
+						if (fired) {
+							fired   = false;
+							to_fire = true;
+						}
+					} else if (check_as == AS_LOWER) {
+						if (!fired) {
+							fired   = true;
+							to_fire = true;
+						}
+					} else
+						throw new Error ("Wrong check_as");
+				}
+			}
+			
+			return (to_fire);
+		}
 		boolean fromString (String in) {
 			boolean isOK = true;
 			double  inVal = 0.0;
@@ -223,6 +271,8 @@ public class StockDetailData implements Parcelable {
 		return (price.is_valid_double() && change.is_valid_double() && symbol.length() > 0);
 	}
 
+	public boolean is_UBoundFired () { return (ubound != null && ubound.isFired()); }
+	public boolean is_LBoundFired () { return (lbound != null && lbound.isFired()); }
     public int describeContents() {
         return 0;
     }
@@ -322,6 +372,20 @@ public class StockDetailData implements Parcelable {
 		InitProperties();
 	}
 	
+	public StockDtlFired Check (StockDetailData in) {
+		StockDtlFired ret = new StockDtlFired ();
+		
+		if (in.price.is_dbl_ok) {
+		if (ubound != null) {
+			ret.UpperToFire = ubound.CheckAs(in.price.dbl_val, MyBound.AS_UPPER);
+		}
+		
+		if (lbound != null) {
+			ret.LowerToFire = lbound.CheckAs(in.price.dbl_val, MyBound.AS_LOWER);
+		}
+		}
+		return (ret);
+	}
 	public void Update (StockDetailData in) {
 		
 		if (!in.getSymbol().equals(symbol)) {
@@ -345,6 +409,7 @@ public class StockDetailData implements Parcelable {
 				lbound = new MyBound(in.lbound);
 		}
 	}
+	
 	
 	public static StockDetailData getDetailsByCursor(Cursor quotas_db_crs) {
 		StockDetailData data_item = null;

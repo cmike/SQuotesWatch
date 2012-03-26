@@ -11,19 +11,30 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.util.Log;
 
+import com.muustwatch.StockDetailData.StockDtlFired;
 import com.muustwatch.db.WatchQuotaDBAdapter;
 
 public class ChkPrice extends Service {
 	private Timer timer = new Timer();
 	private static final long UPDATE_INTERVAL = 5000;
+	private final String class_nm = getClass().getSimpleName();
 	private final IBinder mBinder = new MyBinder();
 	private WatchQuotaDBAdapter dbHelper = null;
 	private StockDtlList dtlList;
-	private Object	stick = new Object();
 	private boolean pass_is_active = false;
 	int idx_in_list_being_proc = -1;
+	
+	private class LoadStick extends Object {
+		boolean completion = false;
+		
+		void notify (boolean is_OK) {
+			completion = is_OK;
+			super.notify();
+		}
+	}
+
+	private LoadStick	stick = new LoadStick();
 	
 	@Override
 	public void onCreate() {
@@ -42,11 +53,40 @@ public class ChkPrice extends Service {
 					StockDetailData loaded_data_item = (StockDetailData) msg.obj;
 					StockDetailData src_data_item = dtlList.get(idx_in_list_being_proc);
 					
+					boolean upper_was_fired = src_data_item.is_UBoundFired();
+					boolean lower_was_fired = src_data_item.is_LBoundFired();
+					
+					StockDtlFired need_fire = src_data_item.Check (loaded_data_item);
 					src_data_item.Update(loaded_data_item);
 					
-					Log.i(getClass().getSimpleName(), "Loaded: " + loaded_data_item.getSymbol());
+					if (MUUDebug.LOGGING) {
+						String fire_status = "";
+						boolean upper_is_fired = src_data_item.is_UBoundFired();
+						boolean lower_is_fired = src_data_item.is_LBoundFired();
+						
+						if (upper_was_fired != upper_is_fired)
+							fire_status += " Upper Fired " + upper_was_fired + " != " + upper_is_fired;
+					
+						if (need_fire.UpperToFire)
+							fire_status += " Upper limit " +
+									         src_data_item.getUBoundVal() + 
+									         " passed";
+						if (lower_was_fired != lower_is_fired)
+							fire_status += " Lower Fired " + lower_was_fired + " != " + lower_is_fired;
+						
+						if (need_fire.LowerToFire)
+							fire_status += " Lower limit " +
+										   src_data_item.getLBoundVal() +
+										   " passed";
+						
+					    MUUDebug.Log(class_nm, "Loaded: " + 
+					    						loaded_data_item.getSymbol() +
+					    						" price: " +
+					    						loaded_data_item.getPrice() +
+					    						fire_status);
+					}
 					synchronized (stick) {
-						stick.notify();
+						stick.notify(true);
 					}
 				} else {
 					Bundle err_data = msg.getData();
@@ -58,7 +98,11 @@ public class ChkPrice extends Service {
 					if (err_msg == null)
 						err_msg = "Error!";
 					
-					Log.i(getClass().getSimpleName(), "Error requesting data: " + err_msg);
+					MUUDebug.Log(class_nm, "Error requesting data: " + err_msg);
+
+					synchronized (stick) {
+						stick.notify(false);
+					}
 				}
 			}
 		};
@@ -73,6 +117,7 @@ public class ChkPrice extends Service {
 		timer.scheduleAtFixedRate(new TimerTask() {
 			@Override
 			public void run() {
+				boolean at_list_one_OK = false;
 				if (pass_is_active)
 					return;
 				
@@ -85,47 +130,56 @@ public class ChkPrice extends Service {
 
 					int n_in_list = dtlList.size();
 					
-					Log.i(getClass().getSimpleName(), "Staring Loop");
+					MUUDebug.Log(class_nm, "Staring Loop");
 					for (idx_in_list_being_proc = 0; 
 						 idx_in_list_being_proc < n_in_list; 
 						 idx_in_list_being_proc++) {
 						StockDetailData this_item = dtlList.get(idx_in_list_being_proc);
 
-						Log.i(getClass().getSimpleName(), "Processing: " + this_item.getSymbol());
+						MUUDebug.Log(class_nm, "Processing: " + this_item.getSymbol());
 						GetStockDtl (this_item.getSymbol());
 						synchronized (stick) {
 							try {
 								stick.wait();
 							} catch (InterruptedException e) {
 								// e.printStackTrace();
-								Log.i(getClass().getSimpleName(), "Loop interrupted");
+								MUUDebug.Log(class_nm, "Loop interrupted");
 								break;
 							}
 						}
+						if (stick.completion) {
 						Long rowID = dtlList.getDBrowID (idx_in_list_being_proc);
 						dbHelper.updateWQuota (rowID, this_item);
-						Log.i(getClass().getSimpleName(), "Keep Going");
+						at_list_one_OK = true;
+						} else {
+							MUUDebug.Log(class_nm, "Failure " + this_item.getSymbol());
+						}
+						MUUDebug.Log(class_nm, "Keep Going");
 					}
-					Log.i(getClass().getSimpleName(), "Loop passed");
+					MUUDebug.Log(class_nm, "Loop passed");
 					idx_in_list_being_proc = -1;
 					
 				}
 				crsFull.deactivate();
 				dbHelper.close();				
 				pass_is_active = false;
+				if (!at_list_one_OK) {
+					ChkPrice.this.stopSelf(); // Looks like it does not actually stop the Sevice
+					MUUDebug.Log(class_nm, "All Symbols Failed");
+				}
 			}
 		}, 0, UPDATE_INTERVAL);
-		Log.i(getClass().getSimpleName(), "Check Price's Timer started.");
+		MUUDebug.Log(class_nm, "Check Price's Timer started.");
 	}
 
 	@Override
 	public void onDestroy() {
 		if (timer != null) {
 			timer.cancel();
+			MUUDebug.Log(class_nm, "Check Price's Timer stopped.");
 		}
 		super.onDestroy();
-		Log.i(getClass().getSimpleName(), "Check Price's Timer stopped.");
-
+		MUUDebug.Log(class_nm, "Check Price's onDestroy passed.");
 	}
 	@Override
 	public IBinder onBind(Intent arg0) {

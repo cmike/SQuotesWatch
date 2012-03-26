@@ -37,7 +37,7 @@ public class DataFileReader {
 		        }
 		}
 	}
-	private DataFileReader (File read_from) {
+	private void InitByFile (File read_from) {
 		FileInputStream fIn = null;
 		file_to_read = read_from;
 		boolean isOK = true;
@@ -52,8 +52,13 @@ public class DataFileReader {
 		if (isOK) {
 			_m_isReader = new InputStreamReader(fIn);
 		    _m_reader = new BufferedReader(_m_isReader);
+		} else {
+			_m_isReader = null;
+			_m_reader = null;
 		}
-		
+	}
+	private DataFileReader (File read_from) {
+		InitByFile (read_from);
 	}
 	public static DataFileReader ReaderInit(String symb_name) {
 		DataFileReader out = null;
@@ -73,15 +78,23 @@ public class DataFileReader {
 		return (out);
 	}
 	public boolean LoadNextLine (StockDetailData item_to_load_to) {
-		boolean loaded = true;
+		boolean loaded = false;
+		
 		try {
 	        String line = _m_reader.readLine();
 	        
 	        if (MUUDebug.LOOP_READ && line == null && line_no >= 0) {
-	            _m_reader = new BufferedReader(_m_isReader);
-	            line_no = -1;
-	            line = _m_reader.readLine();
+	        	if (MUUDebug.LOGGING)
+	        		MUUDebug.Log (getClass().getSimpleName(), 
+	        				"Reseting " +
+	        						file_to_read.getName() +
+	        						" after " +
+	        						line_no + " lines read");
+	        	InitByFile (file_to_read);
+	        	line_no = -1;
+	        	line = _m_reader.readLine();
 	        }
+	        
 	        if (line != null) {
 	             String[] RowData = line.split(",");
 	             
