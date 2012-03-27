@@ -1,5 +1,6 @@
 package com.muustwatch;
 
+import java.util.Hashtable;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -23,6 +24,7 @@ public class ChkPrice extends Service {
 	private WatchQuotaDBAdapter dbHelper = null;
 	private StockDtlList dtlList;
 	private boolean pass_is_active = false;
+	Hashtable<String, StockDtlFired> sv_fired_stat = new Hashtable<String, StockDtlFired>();
 	int idx_in_list_being_proc = -1;
 	
 	private class LoadStick extends Object {
@@ -57,6 +59,17 @@ public class ChkPrice extends Service {
 					boolean lower_was_fired = src_data_item.is_LBoundFired();
 					
 					StockDtlFired need_fire = src_data_item.Check (loaded_data_item);
+					
+					StockDtlFired sv_this_stat = new StockDtlFired ();
+					
+					sv_this_stat.UpperToFire = src_data_item.is_UBoundFired();
+					sv_this_stat.LowerToFire = src_data_item.is_LBoundFired();
+					sv_fired_stat.put(src_data_item.getSymbol(), sv_this_stat);
+					
+					// Call below most likely useless: there is no need
+					// update memory object, since it will be anyway release
+					// upon next run() cycle, and all the data gets put
+					// into DB
 					src_data_item.Update(loaded_data_item);
 					
 					if (MUUDebug.LOGGING) {
@@ -134,8 +147,11 @@ public class ChkPrice extends Service {
 					for (idx_in_list_being_proc = 0; 
 						 idx_in_list_being_proc < n_in_list; 
 						 idx_in_list_being_proc++) {
+						
 						StockDetailData this_item = dtlList.get(idx_in_list_being_proc);
 
+						this_item.UpdateFiredState (sv_fired_stat.get(this_item.getSymbol()));
+						
 						MUUDebug.Log(class_nm, "Processing: " + this_item.getSymbol());
 						GetStockDtl (this_item.getSymbol());
 						synchronized (stick) {
@@ -148,9 +164,9 @@ public class ChkPrice extends Service {
 							}
 						}
 						if (stick.completion) {
-						Long rowID = dtlList.getDBrowID (idx_in_list_being_proc);
-						dbHelper.updateWQuota (rowID, this_item);
-						at_list_one_OK = true;
+						    Long rowID = dtlList.getDBrowID (idx_in_list_being_proc);
+						    dbHelper.updateWQuota (rowID, this_item);
+						    at_list_one_OK = true;
 						} else {
 							MUUDebug.Log(class_nm, "Failure " + this_item.getSymbol());
 						}

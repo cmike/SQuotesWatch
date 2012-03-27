@@ -322,9 +322,10 @@ public class PrtfSymbols extends Activity implements OnClickListener {
 	}
 	@Override
 	public void onDestroy () {
-		unbindService (mConnection);
-		if (s != null)
+		if (s != null) {
+			unbindService (mConnection);
 			s.stopSelf();
+		}
 		
 		if (!MUUDebug.REAL_LOAD)
 			DataFileStorage.Release();

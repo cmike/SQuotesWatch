@@ -52,7 +52,6 @@ public class StockDetailData implements Parcelable {
 		MyBound () { value = 0.0; is_defined = false;}
 		MyBound (MyBound in) { value = in.value; is_defined = in.is_defined; }
 		
-		@SuppressWarnings("unused")
 		boolean isFired () { return (fired); }
 		boolean CheckAs (double check_against, int check_as) {
 			boolean to_fire = false;
@@ -374,17 +373,29 @@ public class StockDetailData implements Parcelable {
 	
 	public StockDtlFired Check (StockDetailData in) {
 		StockDtlFired ret = new StockDtlFired ();
-		
+
 		if (in.price.is_dbl_ok) {
-		if (ubound != null) {
-			ret.UpperToFire = ubound.CheckAs(in.price.dbl_val, MyBound.AS_UPPER);
-		}
-		
-		if (lbound != null) {
-			ret.LowerToFire = lbound.CheckAs(in.price.dbl_val, MyBound.AS_LOWER);
-		}
+			if (ubound != null) {
+				ret.UpperToFire = ubound.CheckAs(in.price.dbl_val, MyBound.AS_UPPER);
+			}
+
+			if (lbound != null) {
+				ret.LowerToFire = lbound.CheckAs(in.price.dbl_val, MyBound.AS_LOWER);
+			}
 		}
 		return (ret);
+	}
+	
+	public void UpdateFiredState (StockDtlFired state_to_set) {
+		if (state_to_set != null) {
+			if (ubound != null) {
+				ubound.fired = state_to_set.UpperToFire;
+			}
+
+			if (lbound != null) {
+				lbound.fired = state_to_set.LowerToFire; 
+			}
+		}
 	}
 	public void Update (StockDetailData in) {
 		

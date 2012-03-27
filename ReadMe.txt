@@ -1,3 +1,6 @@
+5:53 PM 3/27/2012
+Point #3 of prev. was not correct - Stop reporting already reported even is required -> Implemented.
+
 9:05 PM 3/26/2012
 1. Resolved Prev.
 2. Implemented Bounds passing Check.
