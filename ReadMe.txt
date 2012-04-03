@@ -1,3 +1,6 @@
+8:40 PM 4/3/2012
+Implemented Status Bar Notification, but Notification counter remains always 1.
+
 5:53 PM 3/27/2012
 Point #3 of prev. was not correct - Stop reporting already reported even is required -> Implemented.
 

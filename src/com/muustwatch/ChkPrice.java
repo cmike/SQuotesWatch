@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 
+import com.muustwatch.LimitCrossingNotifier.LimitType;
 import com.muustwatch.StockDetailData.StockDtlFired;
 import com.muustwatch.db.WatchQuotaDBAdapter;
 
@@ -37,10 +38,12 @@ public class ChkPrice extends Service {
 	}
 
 	private LoadStick	stick = new LoadStick();
+	LimitCrossingNotifier notifier = null;
 	
 	@Override
 	public void onCreate() {
 		super.onCreate();
+		notifier = new LimitCrossingNotifier (getApplicationContext());
 		dbHelper = new WatchQuotaDBAdapter(ChkPrice.this);
 		
 		pollForUpdates();
@@ -72,6 +75,16 @@ public class ChkPrice extends Service {
 					// into DB
 					src_data_item.Update(loaded_data_item);
 					
+					if (need_fire.UpperToFire) {
+						notifier.LimitCrossingNotify(src_data_item.getSymbol(), loaded_data_item.getPrice(), 
+								src_data_item.getUBoundVal(), LimitType.UpperLimit);
+
+					}
+					if (need_fire.LowerToFire) {
+						notifier.LimitCrossingNotify(src_data_item.getSymbol(), loaded_data_item.getPrice(), 
+								src_data_item.getLBoundVal(), LimitType.LowerLimit);
+
+					}
 					if (MUUDebug.LOGGING) {
 						String fire_status = "";
 						boolean upper_is_fired = src_data_item.is_UBoundFired();
