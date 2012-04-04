@@ -47,7 +47,7 @@ public class LimitCrossingNotifier {
 		
 		switch (l_type) {
 			case LowerLimit:
-				this_info.mLowerCount =+ 1;
+				this_info.mLowerCount += 1;
 				if (this_info.mLowerID == -1)
 					this_info.mLowerID = UniqNotifyID_get();
 				
@@ -57,7 +57,7 @@ public class LimitCrossingNotifier {
 				notificationCounter = this_info.mLowerCount;
 				break;
 			case UpperLimit:
-				this_info.mUpperCount =+ 1;
+				this_info.mUpperCount += 1;
 				if (this_info.mUpperID == -1)
 					this_info.mUpperID = UniqNotifyID_get();
 				iconID = R.drawable.icon_green_notif_dollars;
