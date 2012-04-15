@@ -1,3 +1,6 @@
+7:59 PM 4/15/2012
+Resolved prev. Implemented launching/killing checking service at specified time (events are scheduled upon booting up)
+
 8:40 PM 4/3/2012
 Implemented Status Bar Notification, but Notification counter remains always 1.
 
