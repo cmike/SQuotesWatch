@@ -168,6 +168,12 @@ public class PrtfSymbols extends Activity implements OnClickListener {
 		intent.putExtra("FromTable", true);
 		startActivity(intent);
 	}
+	private void editPrefs () {
+		Intent intent = new Intent(PrtfSymbols.this, Prefs.class);
+
+		intent.putExtra("FromTable", true);
+		startActivity(intent);
+	}
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
@@ -198,6 +204,9 @@ public class PrtfSymbols extends Activity implements OnClickListener {
 			break;
 		case R.id.startServID:
 			doServiceBind ();
+			break;
+		case R.id.PrefsID:
+			editPrefs ();
 			break;
 		}
 		return (true);

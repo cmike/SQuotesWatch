@@ -4,5 +4,6 @@
     <item android:title="Add" android:id="@+id/addNewID"></item>
     <item android:title="Exit" android:id="@+id/exitID"></item>
     <item android:title="Start Service" android:id="@+id/startServID"></item>
+    <item android:id="@+id/PrefsID" android:title="Preferences"></item>
     
 </menu>

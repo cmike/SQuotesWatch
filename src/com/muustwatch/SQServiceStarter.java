@@ -48,7 +48,7 @@ public class SQServiceStarter extends BroadcastReceiver {
 		 // In reality, you would want to have a static variable for the request code instead of 192837
 		int requestCode2 = 192837; // ???
 	    PendingIntent sender = PendingIntent.getBroadcast(in_context.getApplicationContext(), 
-	    		requestCode2, killer, PendingIntent.FLAG_UPDATE_CURRENT);
+	    		requestCode2, killer, PendingIntent.FLAG_CANCEL_CURRENT);
 		 
 
 		 alarmManager.set(AlarmManager.RTC_WAKEUP, to_kill.getTimeInMillis(), sender);

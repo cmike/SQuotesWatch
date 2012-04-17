@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:id="@+id/linearLayout1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" 
+        android:orientation="horizontal" >
+        
+        <TextView
+            android:id="@+id/textView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.62"
+            android:text="@string/REQ_INTERVAL_LBL"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <EditText
+            android:id="@+id/editText1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.62"
+            android:inputType="number" >
+
+            <requestFocus />
+        </EditText>
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.62"
+            android:text="@string/REQ_INTERVAL_UNIT_LBL"
+            android:textAppearance="?android:attr/textAppearanceMedium" android:paddingLeft="20dp"/>
+
+    </LinearLayout>
+    <TextView
+            android:id="@+id/textView3"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:maxLines="2"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:text="@string/START_REQUESTING_LBL"
+            android:textAppearance="?android:attr/textAppearanceMedium" android:paddingBottom="5dp"/>
+
+
+
+    <TimePicker
+            android:id="@+id/StartTime"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" android:layout_gravity="center_horizontal" android:paddingBottom="5dp"/>
+    
+    <TextView
+            android:id="@+id/textView4"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:maxLines="2"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:text="@string/STOP_REQUESTING_LBL"
+            android:textAppearance="?android:attr/textAppearanceMedium" android:paddingBottom="5dp" android:paddingTop="5dp"/>
+
+
+    <TimePicker
+            android:id="@+id/StopTime"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" android:layout_gravity="center_horizontal" android:paddingBottom="5dp"/>
+    
+    <LinearLayout
+        android:id="@+id/linearLayout2"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="fill_vertical" >
+
+        <ToggleButton
+            android:id="@+id/toggleButton1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ToggleButton" android:layout_weight="0.14"/>
+
+        <ToggleButton
+            android:id="@+id/toggleButton2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ToggleButton" android:layout_weight="0.14"/>
+
+        <ToggleButton
+            android:id="@+id/toggleButton3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ToggleButton" android:layout_weight="0.14"/>
+
+        <ToggleButton
+            android:id="@+id/toggleButton4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ToggleButton" android:layout_weight="0.14"/>
+        
+        <ToggleButton
+            android:id="@+id/toggleButton5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ToggleButton" android:layout_weight="0.14"/>
+        
+        <ToggleButton
+            android:id="@+id/toggleButton6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ToggleButton" android:layout_weight="0.14"/>
+        
+        <ToggleButton
+            android:id="@+id/toggleButton7"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ToggleButton" android:layout_weight="0.14"/>
+       
+       </LinearLayout>
+
+</LinearLayout>
