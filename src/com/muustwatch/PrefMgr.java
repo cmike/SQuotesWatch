@@ -11,6 +11,7 @@ public class PrefMgr {
 	static final String START_M = "StartMinutes";
 	static final String STOP_H = "StopHour";
 	static final String STOP_M = "StopMinutes";
+	static final String REQ_INTVAL_MINUTES = "ReqIntvalMinutes";
 
 	static AppPrefs m_AppPrefs = null;
 	
@@ -21,6 +22,8 @@ public class PrefMgr {
 		int m_stop_hours;
 		int m_stop_minutes;
 		
+		int m_request_minutes;
+		
 		boolean[] active_days = null;
 
 		AppPrefs () {
@@ -30,6 +33,8 @@ public class PrefMgr {
 			m_stop_hours = -1;
 			m_stop_minutes =-1;
 			
+			m_request_minutes = -1;
+			
 		    active_days = new boolean[7];
 		    for (int _i = 0; _i < 7; _i++)
 		    	active_days[_i] = false;
@@ -38,6 +43,8 @@ public class PrefMgr {
 			return (hours >= 0 && hours <= 23 &&
 					minutes >= 0 && minutes <= 59);
 		}
+		public void RequestIntervalSet (int minutes) { m_request_minutes = minutes; }
+		public int  RequestIntervalGet () { return (m_request_minutes); }
 		public void StartTimeSet (int hours, int minutes) {
 			if (_ValidTime (hours, minutes)) {
 				m_start_hours = hours;
@@ -148,7 +155,7 @@ public class PrefMgr {
 	}
 	public static void Load (Context app_ctx) {
 		String active_days_coded;
-		int _st_hours, _st_minutes, _end_hours, _end_minutes;
+		int _st_hours, _st_minutes, _end_hours, _end_minutes, _r_intval;
 		
         SharedPreferences mySharedPreferences = app_ctx.getSharedPreferences(
         		PREFS_SET, Activity.MODE_PRIVATE);
@@ -160,11 +167,14 @@ public class PrefMgr {
         _end_hours = mySharedPreferences.getInt(STOP_H, -1);
         _end_minutes = mySharedPreferences.getInt(STOP_M, -1);
         
+        _r_intval = mySharedPreferences.getInt(REQ_INTVAL_MINUTES, -1);
+        
         if (m_AppPrefs == null)
         	m_AppPrefs = new AppPrefs();
         
         m_AppPrefs.StartTimeSet(_st_hours, _st_minutes);
         m_AppPrefs.StopTimeSet(_end_hours, _end_minutes);
+        m_AppPrefs.RequestIntervalSet(_r_intval);
         m_AppPrefs.ActiveDaysFromString (active_days_coded);
 	}
 	
@@ -180,6 +190,7 @@ public class PrefMgr {
         	editor.remove(START_M);
         	editor.remove(STOP_H);
         	editor.remove(STOP_M);
+        	editor.remove(REQ_INTVAL_MINUTES);
         } else {
 		    String active_days_coded = m_AppPrefs.ActiveDaysToString();
 		    
@@ -196,6 +207,10 @@ public class PrefMgr {
 		    
 			editor.putInt(STOP_H, _end_hours);
 			editor.putInt(STOP_M, _end_minutes);
+			
+			int _r_int = m_AppPrefs.RequestIntervalGet();
+			
+			editor.putInt(REQ_INTVAL_MINUTES, _r_int);
         }
 		
 		editor.commit();
@@ -230,5 +245,51 @@ public class PrefMgr {
 			m_AppPrefs = new AppPrefs();
 		
 		m_AppPrefs.StopTimeSet (hours, minutes);
+	}
+	public static int StartHourGet () {
+		int ret = -1;
+		
+		if (m_AppPrefs != null)
+			ret = m_AppPrefs.StartHourGet();
+		
+		return (ret);
+	}
+	public static int StartMinutesGet () {
+		int ret = -1;
+		
+		if (m_AppPrefs != null)
+			ret = m_AppPrefs.StartMinutesGet();
+		
+		return (ret);
+	}
+	public static int StopHourGet () {
+		int ret = -1;
+		
+		if (m_AppPrefs != null)
+			ret = m_AppPrefs.StopHourGet();
+		
+		return (ret);
+	}
+	public static int StopMinutesGet () {
+		int ret = -1;
+		
+		if (m_AppPrefs != null)
+			ret = m_AppPrefs.StopMinutesGet();
+		
+		return (ret);
+	}
+	public static int RequestIntervalGet () {
+		int ret = -1;
+		
+		if (m_AppPrefs != null)
+			ret = m_AppPrefs.RequestIntervalGet();
+		
+		return (ret);
+	}
+	public static void RequestIntervalSet (int minutes) {
+		if (m_AppPrefs == null)
+			m_AppPrefs = new AppPrefs();
+		
+		m_AppPrefs.RequestIntervalSet(minutes);
 	}
 }

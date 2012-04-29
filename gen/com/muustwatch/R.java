@@ -21,6 +21,7 @@ public final class R {
         public static final int GetBtn=0x7f06000b;
         public static final int GoToChart=0x7f060005;
         public static final int PrefsID=0x7f060020;
+        public static final int ReqInt=0x7f06000e;
         public static final int StartTime=0x7f060011;
         public static final int StopTime=0x7f060013;
         public static final int addNewID=0x7f06001d;
@@ -28,7 +29,6 @@ public final class R {
         public static final int baseTable=0x7f06001c;
         public static final int button=0x7f06000c;
         public static final int chartWebView=0x7f060000;
-        public static final int editText1=0x7f06000e;
         public static final int exch=0x7f060008;
         public static final int exitID=0x7f06001e;
         public static final int linearLayout1=0x7f06000a;
