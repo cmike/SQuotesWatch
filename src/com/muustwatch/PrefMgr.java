@@ -1,5 +1,7 @@
 package com.muustwatch;
 
+import java.util.Calendar;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -14,6 +16,16 @@ public class PrefMgr {
 	static final String REQ_INTVAL_MINUTES = "ReqIntvalMinutes";
 
 	static AppPrefs m_AppPrefs = null;
+	
+	static class WorkingTime {
+		public Calendar start_date;
+		public Calendar stop_date;
+		
+		WorkingTime (Calendar in_start, Calendar in_stop) {
+			start_date = in_start;
+			stop_date  = in_stop;
+		}
+	}
 	
 	static class AppPrefs {
 		int	m_start_hours;
@@ -131,6 +143,9 @@ public class PrefMgr {
 			if (ret)
 				ret = _ValidTime (m_stop_hours, m_stop_minutes);
 			
+			if (ret)
+				ret = (m_request_minutes > 0);
+			
 			if (ret) {
 				boolean atleast_one = false;
 				for (int _i = 0; _i < 7 && !atleast_one; _i++)
@@ -140,7 +155,86 @@ public class PrefMgr {
 			}
 			return (ret);
 		}
+		
+		private Calendar closest_active_get (Calendar since_this) {
+			Calendar ret = null;
+			Calendar closest = (Calendar) since_this.clone();
+			
+			int this_day_code = since_this.get(Calendar.DAY_OF_WEEK);
+			int _i_day = 7;
+			
+			while (!isDayActive(this_day_code) && _i_day > 0) {
+				closest.add(Calendar.DAY_OF_WEEK, 1);
+				this_day_code = closest.get(Calendar.DAY_OF_WEEK);
+				_i_day--;
+			}
+
+			if (_i_day > 0)
+				ret = closest;
+			else if (MUUDebug.ON)
+				throw new Error ("No Active Days Found");
+			
+			return (ret);
+		}
+		public WorkingTime WorkingTimeGet () {
+			WorkingTime ret = null;
+			Calendar ret_start = null;
+			Calendar ret_stop  = null;
+
+			if (isDefined()) {
+				boolean next_day_stop = false;
+
+				Calendar right_now = Calendar.getInstance();
+				Calendar closest_start = (Calendar) right_now.clone();
+				Calendar closest_stop = (Calendar) closest_start.clone();
+
+				closest_start.set(Calendar.HOUR_OF_DAY, m_start_hours);
+				closest_start.set(Calendar.MINUTE, m_start_minutes);
+
+				closest_stop.set(Calendar.HOUR_OF_DAY, m_stop_hours);
+				closest_stop.set(Calendar.MINUTE, m_stop_minutes);
+				
+				if (closest_start.after(closest_stop)) {
+					closest_stop.add(Calendar.DAY_OF_WEEK, 1);
+					next_day_stop = true;
+				}
+				
+				if (right_now.after(closest_stop))
+					closest_start.add(Calendar.DAY_OF_WEEK, 1);
+
+				closest_start = closest_active_get(closest_start);
+				if (closest_start != null) {
+					int this_day_code = closest_start.get(Calendar.DAY_OF_WEEK);
+
+					closest_stop = (Calendar) closest_start.clone();
+					closest_stop.set(Calendar.HOUR_OF_DAY, m_stop_hours);
+					closest_stop.set(Calendar.MINUTE, m_stop_minutes);
+					if (next_day_stop)
+						closest_stop.add(Calendar.DAY_OF_WEEK, 1);
+					
+					if (this_day_code == right_now.get(Calendar.DAY_OF_WEEK)) {
+						if (right_now.before(closest_start))
+							ret_start = closest_start;
+						else if (right_now.before(closest_stop)) {
+							ret_start = (Calendar) right_now.clone();
+							ret_start.add (Calendar.MINUTE, 2);
+						}
+					}
+					else
+						ret_start = closest_start;
+					
+					ret_stop = closest_stop;
+				}
+			}
+			
+			if (ret_start != null && ret_stop != null)
+				ret = new WorkingTime(ret_start, ret_stop);
+			
+			return (ret);
+		}
+
 	}
+
 	boolean day_coded_string_isOK (String to_check) {
 		int n_chars = (to_check != null) ? to_check.length() : 0;
 		boolean isOK = (n_chars == 7);
@@ -291,5 +385,13 @@ public class PrefMgr {
 			m_AppPrefs = new AppPrefs();
 		
 		m_AppPrefs.RequestIntervalSet(minutes);
+	}
+	public static WorkingTime WorkingTimeGet () {
+		WorkingTime ret = null;
+		
+		if (m_AppPrefs != null)
+			ret = m_AppPrefs.WorkingTimeGet();
+		
+		return (ret);
 	}
 }
