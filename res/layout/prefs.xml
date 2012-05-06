@@ -2,7 +2,19 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    android:gravity="bottom"
     android:orientation="vertical" >
+
+    <ScrollView
+        android:id="@+id/scrollView1"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" >
+
+        <LinearLayout
+            android:id="@+id/linearLayout5"
+            android:layout_width="fill_parent"
+            android:layout_height="452dp"
+            android:orientation="vertical" >
 
     <LinearLayout
         android:id="@+id/linearLayout1"
@@ -37,47 +49,65 @@
             android:textAppearance="?android:attr/textAppearanceMedium" android:paddingLeft="20dp"/>
 
     </LinearLayout>
-    <TextView
+    <LinearLayout 
+        android:id="@+id/linearLayout3" 
+        android:layout_width="fill_parent" 
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
+        <TextView
             android:id="@+id/textView3"
-            android:layout_width="fill_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
+            android:layout_gravity="center_horizontal|center_vertical"
             android:maxLines="2"
+            android:paddingBottom="5dp"
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
             android:text="@string/START_REQUESTING_LBL"
-            android:textAppearance="?android:attr/textAppearanceMedium" android:paddingBottom="5dp"/>
-
-
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <TimePicker
             android:id="@+id/StartTime"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content" android:layout_gravity="center_horizontal" android:paddingBottom="5dp"/>
-    
-    <TextView
-            android:id="@+id/textView4"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:maxLines="2"
-            android:paddingLeft="5dp"
-            android:paddingRight="5dp"
-            android:text="@string/STOP_REQUESTING_LBL"
-            android:textAppearance="?android:attr/textAppearanceMedium" android:paddingBottom="5dp" android:paddingTop="5dp"/>
+    </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/linearLayout4"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+    
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal|center_vertical"
+        android:maxLines="2"
+        android:paddingBottom="5dp"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:paddingTop="5dp"
+        android:text="@string/STOP_REQUESTING_LBL"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <TimePicker
-            android:id="@+id/StopTime"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content" android:layout_gravity="center_horizontal" android:paddingBottom="5dp"/>
+        android:id="@+id/StopTime"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="5dp" />
+
+    </LinearLayout>
     
     <LinearLayout
         android:id="@+id/linearLayout2"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="fill_vertical" >
-
+        android:layout_gravity="fill_vertical"
+        android:orientation="horizontal" 
+        android:paddingTop="5dp" >
+
         <ToggleButton
             android:id="@+id/toggleButton1"
             android:layout_width="wrap_content"
@@ -121,5 +151,15 @@
             android:text="ToggleButton" android:layout_weight="0.14"/>
        
        </LinearLayout>
+    <Button
+        android:id="@+id/SavePrefBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:text="@string/SAVE_BTN_LBL" />
+            </LinearLayout>
+    </ScrollView>
+
 
+    
 </LinearLayout>

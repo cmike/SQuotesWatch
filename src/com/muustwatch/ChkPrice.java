@@ -19,7 +19,7 @@ import com.muustwatch.db.WatchQuotaDBAdapter;
 
 public class ChkPrice extends Service {
 	private Timer timer = new Timer();
-	private static final long UPDATE_INTERVAL = 5000;
+	private long UPDATE_INTERVAL = 5000;
 	private final String class_nm = getClass().getSimpleName();
 	private final IBinder mBinder = new MyBinder();
 	private WatchQuotaDBAdapter dbHelper = null;
@@ -43,10 +43,22 @@ public class ChkPrice extends Service {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		notifier = new LimitCrossingNotifier (getApplicationContext());
-		dbHelper = new WatchQuotaDBAdapter(ChkPrice.this);
 		
-		pollForUpdates();
+		if (PrefMgr.isDefined())
+		{
+			int r_intval = PrefMgr.RequestIntervalGet();
+			
+			if (r_intval > 0) {
+				
+				MUUDebug.Log(class_nm, "Request interval: " + r_intval);
+				UPDATE_INTERVAL = r_intval * 1000 * 60;
+				notifier = new LimitCrossingNotifier (getApplicationContext());
+				dbHelper = new WatchQuotaDBAdapter(ChkPrice.this);
+				
+				pollForUpdates();
+			}
+		}
+		
 	}
 
 	private Handler handler = new Handler(){

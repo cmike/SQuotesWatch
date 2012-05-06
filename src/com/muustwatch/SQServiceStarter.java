@@ -12,12 +12,13 @@ import android.content.Intent;
 
 public class SQServiceStarter extends BroadcastReceiver {
 
+	static final String  cl_nm = "SQServiceStarter";
 	@Override
 	public void onReceive(Context in_context, Intent intent) {
 
 		WorkingTime  wrk_time = null;
 
-		MUUDebug.Log("SQServiceStarter", "SQServiceStarter got control");
+		MUUDebug.Log(cl_nm, "SQServiceStarter got control");
 
 		PrefMgr.Load(in_context);
 
@@ -27,6 +28,11 @@ public class SQServiceStarter extends BroadcastReceiver {
 		if (wrk_time != null) {
 			Calendar to_fire = wrk_time.start_date;
 			Calendar to_kill = wrk_time.stop_date;
+			
+			
+			MUUDebug.Log(cl_nm, "Start time" + to_fire.getTime().toString());
+			MUUDebug.Log(cl_nm, "Stop time" + to_kill.getTime().toString());
+			
 
 			long adate = to_fire.getTimeInMillis ();
 

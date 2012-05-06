@@ -104,7 +104,6 @@ public class Prefs extends Activity {
 	
 	@Override
 	public void onPause () {
-		super.onPause();
 		
 		for (int _i = 0; _i < 7; _i++) {
 			PrefMgr.SetDayIsActive(_i, UI_WeekDays[_i].isChecked());
@@ -130,5 +129,6 @@ public class Prefs extends Activity {
 			PrefMgr.RequestIntervalSet(r_int);
 		
 		PrefMgr.Save(this_ctx);
+		super.onPause();
 	}
 }
