@@ -2,20 +2,19 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:gravity="bottom"
     android:orientation="vertical" >
 
     <ScrollView
         android:id="@+id/scrollView1"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" >
-
-        <LinearLayout
+    <LinearLayout
             android:id="@+id/linearLayout5"
             android:layout_width="fill_parent"
-            android:layout_height="452dp"
-            android:orientation="vertical" >
-
+            android:layout_height="wrap_content"
+    android:orientation="vertical" >
+        
+ 
     <LinearLayout
         android:id="@+id/linearLayout1"
         android:layout_width="fill_parent"
@@ -99,7 +98,7 @@
         android:paddingBottom="5dp" />
 
     </LinearLayout>
-    
+    
     <LinearLayout
         android:id="@+id/linearLayout2"
         android:layout_width="fill_parent"
@@ -151,15 +150,7 @@
             android:text="ToggleButton" android:layout_weight="0.14"/>
        
        </LinearLayout>
-    <Button
-        android:id="@+id/SavePrefBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:text="@string/SAVE_BTN_LBL" />
-            </LinearLayout>
+        </LinearLayout>
     </ScrollView>
-
-
     
 </LinearLayout>

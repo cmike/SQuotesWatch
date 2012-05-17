@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.format.DateFormat;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.TimePicker;
 import android.widget.ToggleButton;
@@ -17,7 +18,7 @@ public class Prefs extends Activity {
 	int  stop_hour = -1;
 	int  stop_minutes = -1;
 	Context this_ctx = null;
-	boolean is24;
+	boolean is24 = false;
 	TimePicker StartTime, StopTime;
 	EditText  ReqInterval;
 	ToggleButton[] UI_WeekDays = new ToggleButton[7];
@@ -69,11 +70,25 @@ public class Prefs extends Activity {
           UI_WeekDays[_i].setTextOn(short_D_name);
           UI_WeekDays[_i].setTextOff(short_D_name);
           
-          UI_WeekDays[_i].setChecked(PrefMgr.isDayActive(_i));
+          UI_WeekDays[_i].setChecked(PrefMgr.isDayActive(_i + 1));
         }
         StartTime = (TimePicker)findViewById(R.id.StartTime);
         StopTime = (TimePicker)findViewById(R.id.StopTime);
 
+        
+        ReqInterval = (EditText)findViewById(R.id.ReqInt);
+        
+        Integer r_interval = PrefMgr.RequestIntervalGet();
+        
+        if (r_interval > 0) {
+          String text_minutes = r_interval.toString();
+          ReqInterval.setText(text_minutes);
+        }
+	}
+
+	@Override
+	public void onResume () {
+		super.onResume();
         start_hour = PrefMgr.StartHourGet();
         if (start_hour != -1) {
         	StartTime.setCurrentHour(start_hour);
@@ -91,22 +106,16 @@ public class Prefs extends Activity {
         	StopTime.setCurrentMinute(stop_minutes);
         }
         StopTime.setIs24HourView(is24);
-        
-        ReqInterval = (EditText)findViewById(R.id.ReqInt);
-        
-        Integer r_interval = PrefMgr.RequestIntervalGet();
-        
-        if (r_interval > 0) {
-          String text_minutes = r_interval.toString();
-          ReqInterval.setText(text_minutes);
-        }
+
+		return;
 	}
-	
 	@Override
 	public void onPause () {
-		
+		super.onPause();
+
+		ReqInterval.requestFocus(View.FOCUS_DOWN);
 		for (int _i = 0; _i < 7; _i++) {
-			PrefMgr.SetDayIsActive(_i, UI_WeekDays[_i].isChecked());
+			PrefMgr.SetDayIsActive(_i + 1, UI_WeekDays[_i].isChecked());
 	    }
 		
 		start_hour    = StartTime.getCurrentHour();
@@ -129,6 +138,5 @@ public class Prefs extends Activity {
 			PrefMgr.RequestIntervalSet(r_int);
 		
 		PrefMgr.Save(this_ctx);
-		super.onPause();
 	}
 }

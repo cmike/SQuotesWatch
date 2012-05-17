@@ -232,6 +232,9 @@ public class PrtfSymbols extends Activity implements OnClickListener {
 			
 		});
 
+		Context app_ctx = getApplicationContext();
+		PrefMgr.Load(app_ctx);
+		ScheduleServ.Launch(app_ctx);
 		if (!FillTable ())
 			obtain_symb ();
 	}

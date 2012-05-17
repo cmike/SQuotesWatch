@@ -8,5 +8,4 @@
     <string name="REQ_INTERVAL_UNIT_LBL">min</string>
     <string name="START_REQUESTING_LBL">Start at:</string>
     <string name="STOP_REQUESTING_LBL">Stop at:</string>
-    <string name="SAVE_BTN_LBL">Save</string>
 </resources>
