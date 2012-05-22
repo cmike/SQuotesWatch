@@ -45,18 +45,18 @@ public class Prefs extends Activity {
         
         DateFormatSymbols symbols = new DateFormatSymbols(); 
         String[] dayNames = symbols.getShortWeekdays();
-        String class_nm = "Days of the Week";
-        
-        for (String s : dayNames) { 
-        	   System.out.print(s + " ");
-        	}
-        System.out.print("\n");
-        
-        MUUDebug.Log(class_nm, "Days = " + dayNames.length);
-        MUUDebug.Log(class_nm, "First Day = " + first_day_a_week);
-        for (int idx=0; idx < 7; idx++) {
-           MUUDebug.Log(class_nm, dayNames[LocalizedWeekDayIDs[idx]]);
-        }
+//        String class_nm = "Days of the Week";
+//        
+//        for (String s : dayNames) { 
+//        	   System.out.print(s + " ");
+//        	}
+//        System.out.print("\n");
+//        
+//        MUUDebug.Log(class_nm, "Days = " + dayNames.length);
+//        MUUDebug.Log(class_nm, "First Day = " + first_day_a_week);
+//        for (int idx=0; idx < 7; idx++) {
+//           MUUDebug.Log(class_nm, dayNames[LocalizedWeekDayIDs[idx]]);
+//        }
         
         for (_i = 0; _i < 7; _i++) {
           UI_WeekDays[_i] = (ToggleButton)findViewById(UI_WeekDays_IDS[_i]);
@@ -138,5 +138,6 @@ public class Prefs extends Activity {
 			PrefMgr.RequestIntervalSet(r_int);
 		
 		PrefMgr.Save(this_ctx);
+		ScheduleServ.Launch(this_ctx);
 	}
 }

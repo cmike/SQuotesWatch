@@ -1,3 +1,7 @@
+8:07 PM 5/22/2012
+Fixed THE bug in Scheduler. Add is Running Method.
+TODO: re-scheduling adds new items in Alarm Manager queue instead of replacing an existing ones.
+
 7:59 PM 4/15/2012
 Resolved prev. Implemented launching/killing checking service at specified time (events are scheduled upon booting up)
 

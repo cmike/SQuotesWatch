@@ -205,6 +205,9 @@ public class PrtfSymbols extends Activity implements OnClickListener {
 		case R.id.startServID:
 			doServiceBind ();
 			break;
+		case R.id.StopServID:
+			SQServiceKiller.Kill(this);
+			break;
 		case R.id.PrefsID:
 			editPrefs ();
 			break;

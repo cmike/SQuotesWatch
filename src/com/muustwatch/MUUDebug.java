@@ -11,6 +11,6 @@ public final class MUUDebug {
 	public static final boolean LOGGING = true;
 	public static void  Log (String class_nm, String to_log) {
 		if (LOGGING)
-			Log.i(class_nm, to_log);
+			Log.d(class_nm, to_log);
 	}
 }

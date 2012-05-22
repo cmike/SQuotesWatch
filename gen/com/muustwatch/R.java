@@ -23,6 +23,7 @@ public final class R {
         public static final int PrefsID=0x7f060024;
         public static final int ReqInt=0x7f060010;
         public static final int StartTime=0x7f060014;
+        public static final int StopServID=0x7f060025;
         public static final int StopTime=0x7f060017;
         public static final int addNewID=0x7f060021;
         public static final int baseScroll=0x7f060001;

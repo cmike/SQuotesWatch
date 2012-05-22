@@ -49,7 +49,7 @@ public class ScheduleServ {
 
 
 			alarmManager.set(AlarmManager.RTC_WAKEUP, to_kill.getTimeInMillis(), sender);
-		}
-	   
+		} else
+			MUUDebug.Log(cl_nm, "No re-start time found ");
    }
 }

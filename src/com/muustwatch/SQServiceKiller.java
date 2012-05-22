@@ -9,16 +9,23 @@ public class SQServiceKiller extends BroadcastReceiver {
 	@Override
 	public void onReceive(Context in_context, Intent arg1) {
 
-		Intent serv_intent = new Intent(in_context, ChkPrice.class);
+		Kill (in_context);
 		
-		if (in_context.getApplicationContext().stopService(serv_intent)) {
+		MUUDebug.Log(cl_nm, "Re-starting Service");		
+		ScheduleServ.Launch(in_context);
+		MUUDebug.Log(cl_nm, "Service all Set");		
+	}
+
+	public static boolean Kill (Context in_context) {
+		Intent serv_intent = new Intent(in_context, ChkPrice.class);
+		boolean ret = in_context.getApplicationContext().stopService(serv_intent);
+		
+		if (ret) {
 			MUUDebug.Log(cl_nm, "Service stopped");
 		} else {
 			MUUDebug.Log(cl_nm, "Service was not stopped");
 		}
 		
-		MUUDebug.Log(cl_nm, "Re-starting Service");		
-		ScheduleServ.Launch(in_context);
+		return (ret);
 	}
-
 }

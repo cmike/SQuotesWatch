@@ -28,6 +28,7 @@ public class PrefMgr {
 	}
 	
 	static class AppPrefs {
+		static final String class_nm = "AppPrefs";
 		int	m_start_hours;
 		int m_start_minutes;
 		
@@ -185,27 +186,30 @@ public class PrefMgr {
 				boolean next_day_stop = false;
 
 				Calendar right_now = Calendar.getInstance();
-				Calendar closest_start = (Calendar) right_now.clone();
-				Calendar closest_stop = (Calendar) closest_start.clone();
+				Calendar tmp_closest_start = (Calendar) right_now.clone();
+				Calendar tmp_closest_stop = (Calendar) tmp_closest_start.clone();
+				Calendar closest_start = null;
+				Calendar closest_stop  = null;
 
-				closest_start.set(Calendar.HOUR_OF_DAY, m_start_hours);
-				closest_start.set(Calendar.MINUTE, m_start_minutes);
+				tmp_closest_start.set(Calendar.HOUR_OF_DAY, m_start_hours);
+				tmp_closest_start.set(Calendar.MINUTE, m_start_minutes);
 
-				closest_stop.set(Calendar.HOUR_OF_DAY, m_stop_hours);
-				closest_stop.set(Calendar.MINUTE, m_stop_minutes);
+				tmp_closest_stop.set(Calendar.HOUR_OF_DAY, m_stop_hours);
+				tmp_closest_stop.set(Calendar.MINUTE, m_stop_minutes);
 				
-				if (closest_start.after(closest_stop)) {
-					closest_stop.add(Calendar.DAY_OF_WEEK, 1);
+				if (tmp_closest_start.after(tmp_closest_stop)) {
+					tmp_closest_stop.add(Calendar.DAY_OF_WEEK, 1);
 					next_day_stop = true;
 				}
 				
-				if (right_now.after(closest_stop))
-					closest_start.add(Calendar.DAY_OF_WEEK, 1);
+				if (!right_now.before(tmp_closest_stop))
+					tmp_closest_start.add(Calendar.DAY_OF_WEEK, 1);
 
-				closest_start = closest_active_get(closest_start);
+				closest_start = closest_active_get(tmp_closest_start);
 				if (closest_start != null) {
 					int this_day_code = closest_start.get(Calendar.DAY_OF_WEEK);
 
+					MUUDebug.Log(class_nm, "closest_start =  " + closest_start.getTime().toString());
 					closest_stop = (Calendar) closest_start.clone();
 					closest_stop.set(Calendar.HOUR_OF_DAY, m_stop_hours);
 					closest_stop.set(Calendar.MINUTE, m_stop_minutes);
@@ -213,22 +217,41 @@ public class PrefMgr {
 						closest_stop.add(Calendar.DAY_OF_WEEK, 1);
 					
 					if (this_day_code == right_now.get(Calendar.DAY_OF_WEEK)) {
+						MUUDebug.Log(class_nm, "closest_start(this_day) =  " + closest_start.getTime().toString());
 						if (right_now.before(closest_start))
-							ret_start = closest_start;
+							ret_start = (Calendar) closest_start.clone();
 						else if (right_now.before(closest_stop)) {
 							ret_start = (Calendar) right_now.clone();
 							ret_start.add (Calendar.MINUTE, 2);
 						}
+						else if (MUUDebug.ON)
+						  throw new Error ("closest_active_get()");
 					}
-					else
-						ret_start = closest_start;
+					else {
+						ret_start = (Calendar) closest_start.clone();
+					MUUDebug.Log(class_nm, "closest_start(not this) =  " + closest_start.getTime().toString());
+					}
 					
-					ret_stop = closest_stop;
+					ret_stop = (Calendar) closest_stop.clone();
+					if (ret_start == null)
+						MUUDebug.Log(class_nm, "ret_start = null");
+					else
+					  MUUDebug.Log(class_nm, "ret_start =  " + ret_start.getTime().toString());
+					
+					MUUDebug.Log(class_nm, "ret_stop =  " + ret_stop.getTime().toString());
 				}
+				else
+					MUUDebug.Log(class_nm, "closest_active_get()==null");
 			}
 			
 			if (ret_start != null && ret_stop != null)
 				ret = new WorkingTime(ret_start, ret_stop);
+			else if (ret_start == null && ret_stop == null)
+				MUUDebug.Log(class_nm, "Both Date null");
+			else if (ret_start == null)
+				MUUDebug.Log(class_nm, "Start Date null");
+			else
+				MUUDebug.Log(class_nm, "Stop Date null");
 			
 			return (ret);
 		}

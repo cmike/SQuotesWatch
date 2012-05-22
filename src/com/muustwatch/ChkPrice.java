@@ -4,7 +4,10 @@ import java.util.Hashtable;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningServiceInfo;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Binder;
@@ -40,6 +43,18 @@ public class ChkPrice extends Service {
 	private LoadStick	stick = new LoadStick();
 	LimitCrossingNotifier notifier = null;
 	
+	public static boolean isRunning (Context ctx) {
+		boolean ret = false;
+		final String full_cl_name = ChkPrice.class.getName();
+	    ActivityManager manager = (ActivityManager) ctx.getSystemService(ACTIVITY_SERVICE);
+	    for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+	        if (full_cl_name.equals(service.service.getClassName())) {
+	            ret = true;
+	            break;
+	        }
+	    }
+		return (ret);
+	}
 	@Override
 	public void onCreate() {
 		super.onCreate();
