@@ -1,5 +1,6 @@
 package com.muustwatch;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -15,6 +16,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
 
 import com.muustwatch.LimitCrossingNotifier.LimitType;
 import com.muustwatch.StockDetailData.StockDtlFired;
@@ -24,13 +27,46 @@ public class ChkPrice extends Service {
 	private Timer timer = new Timer();
 	private long UPDATE_INTERVAL = 5000;
 	private final String class_nm = getClass().getSimpleName();
-	private final IBinder mBinder = new MyBinder();
 	private WatchQuotaDBAdapter dbHelper = null;
 	private StockDtlList dtlList;
 	private boolean pass_is_active = false;
 	Hashtable<String, StockDtlFired> sv_fired_stat = new Hashtable<String, StockDtlFired>();
 	int idx_in_list_being_proc = -1;
 	
+	private static boolean _m_isRunning = false;
+
+	// Keeps track of all current registered clients.
+    ArrayList<Messenger> mClients = new ArrayList<Messenger>();
+    
+    int mValue = 0; // Holds last value set by a client.
+    static final int MSG_REGISTER_CLIENT = 1;
+    static final int MSG_UNREGISTER_CLIENT = 2;
+    static final int MSG_DB_REFRESHED = 3;
+    static final int MSG_UNUSED = 4;
+    
+    // Target we publish for clients to send messages to IncomingHandler.
+    final Messenger mMessenger = new Messenger(new IncomingHandler()); 
+
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return mMessenger.getBinder();
+    }
+    class IncomingHandler extends Handler { // Handler of incoming messages from clients.
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+            case MSG_REGISTER_CLIENT:
+                mClients.add(msg.replyTo);
+                break;
+            case MSG_UNREGISTER_CLIENT:
+                mClients.remove(msg.replyTo);
+                break;
+            default:
+                super.handleMessage(msg);
+            }
+        }
+    }
 	private class LoadStick extends Object {
 		boolean completion = false;
 		
@@ -44,16 +80,19 @@ public class ChkPrice extends Service {
 	LimitCrossingNotifier notifier = null;
 	
 	public static boolean isRunning (Context ctx) {
-		boolean ret = false;
-		final String full_cl_name = ChkPrice.class.getName();
-	    ActivityManager manager = (ActivityManager) ctx.getSystemService(ACTIVITY_SERVICE);
-	    for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-	        if (full_cl_name.equals(service.service.getClassName())) {
-	            ret = true;
-	            break;
-	        }
-	    }
-		return (ret);
+		// Absolutely correct implementation
+		// Make sense in general case.
+//		boolean ret = false;
+//		final String full_cl_name = ChkPrice.class.getName();
+//	    ActivityManager manager = (ActivityManager) ctx.getSystemService(ACTIVITY_SERVICE);
+//	    for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+//	        if (full_cl_name.equals(service.service.getClassName())) {
+//	            ret = true;
+//	            break;
+//	        }
+//	    }
+//		return (ret);
+		return (_m_isRunning);
 	}
 	@Override
 	public void onCreate() {
@@ -71,10 +110,25 @@ public class ChkPrice extends Service {
 				dbHelper = new WatchQuotaDBAdapter(ChkPrice.this);
 				
 				pollForUpdates();
+				
+				_m_isRunning = true;
 			}
 		}
 		
 	}
+	private void sendMessageToClients () {
+        for (int i=mClients.size()-1; i>=0; i--) {
+            try {
+                // Send data as an Integer
+                mClients.get(i).send(Message.obtain(null, MSG_DB_REFRESHED));
+
+
+            } catch (RemoteException e) {
+                // The client is dead. Remove it from the list; 
+                mClients.remove(i);
+            }
+        }
+    }
 
 	private Handler handler = new Handler(){
 		
@@ -215,6 +269,7 @@ public class ChkPrice extends Service {
 					MUUDebug.Log(class_nm, "Loop passed");
 					idx_in_list_being_proc = -1;
 					
+					sendMessageToClients ();
 				}
 				crsFull.deactivate();
 				dbHelper.close();				
@@ -230,6 +285,7 @@ public class ChkPrice extends Service {
 
 	@Override
 	public void onDestroy() {
+		_m_isRunning = false;
 		if (timer != null) {
 			timer.cancel();
 			MUUDebug.Log(class_nm, "Check Price's Timer stopped.");
@@ -237,14 +293,4 @@ public class ChkPrice extends Service {
 		super.onDestroy();
 		MUUDebug.Log(class_nm, "Check Price's onDestroy passed.");
 	}
-	@Override
-	public IBinder onBind(Intent arg0) {
-		return mBinder;
-	}
-	public class MyBinder extends Binder {
-		ChkPrice getService() {
-			return ChkPrice.this;
-		}
-	}
-
 }

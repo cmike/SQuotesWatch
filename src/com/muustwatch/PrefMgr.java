@@ -2,6 +2,8 @@ package com.muustwatch;
 
 import java.util.Calendar;
 
+import com.muustwatch.PrefMgr.WorkingTime;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -27,6 +29,17 @@ public class PrefMgr {
 		}
 	}
 	
+	static boolean HaveToRunNow (WorkingTime when) {
+		boolean ret = false;
+		
+		if (when != null) {
+			Calendar right_now = Calendar.getInstance();
+			
+			if (when.start_date != null && !when.start_date.after(right_now))
+				ret = (when.stop_date != null && right_now.before(when.stop_date));
+		}
+		return (ret);
+	}
 	static class AppPrefs {
 		static final String class_nm = "AppPrefs";
 		int	m_start_hours;
@@ -177,7 +190,7 @@ public class PrefMgr {
 			
 			return (ret);
 		}
-		public WorkingTime WorkingTimeGet () {
+		public WorkingTime WorkingTimeGet (boolean adjust_start) {
 			WorkingTime ret = null;
 			Calendar ret_start = null;
 			Calendar ret_stop  = null;
@@ -221,8 +234,11 @@ public class PrefMgr {
 						if (right_now.before(closest_start))
 							ret_start = (Calendar) closest_start.clone();
 						else if (right_now.before(closest_stop)) {
+							if (adjust_start) {
 							ret_start = (Calendar) right_now.clone();
 							ret_start.add (Calendar.MINUTE, 2);
+							} else
+								ret_start = (Calendar) closest_start.clone();
 						}
 						else if (MUUDebug.ON)
 						  throw new Error ("closest_active_get()");
@@ -253,7 +269,11 @@ public class PrefMgr {
 			else
 				MUUDebug.Log(class_nm, "Stop Date null");
 			
-			return (ret);
+			return (ret);			
+		}
+		
+		public WorkingTime WorkingTimeGet () {
+			return (WorkingTimeGet (true));
 		}
 
 	}
@@ -414,6 +434,14 @@ public class PrefMgr {
 		
 		if (m_AppPrefs != null)
 			ret = m_AppPrefs.WorkingTimeGet();
+		
+		return (ret);
+	}
+	public static WorkingTime WorkingTimeGet(boolean do_adjust) {
+	WorkingTime ret = null;
+		
+		if (m_AppPrefs != null)
+			ret = m_AppPrefs.WorkingTimeGet(do_adjust);
 		
 		return (ret);
 	}

@@ -1,7 +1,10 @@
 package com.muustwatch;
 
+import com.muustwatch.PrefMgr.WorkingTime;
 import com.muustwatch.datafile.DataFileStorage;
 import com.muustwatch.db.WatchQuotaDBAdapter;
+
+import java.util.Calendar;
 import java.util.Hashtable;
 import java.util.Iterator;
 import android.app.Activity;
@@ -14,7 +17,11 @@ import android.content.ServiceConnection;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -30,6 +37,7 @@ import android.widget.Toast;
 public class PrtfSymbols extends Activity implements OnClickListener {
 	
     protected static final int DTL_REQ_FROM_TBL = 1;
+    final static String class_nm = "PrtfSymbols";
     
     protected static final int ID_ADD = 1000;
 	protected static final int ID_DELETE = 1001;
@@ -40,8 +48,26 @@ public class PrtfSymbols extends Activity implements OnClickListener {
 	boolean  in_pause = false;
 	ScrollView sv = null;
 	TableLayout t = null;
-	ChkPrice s = null;
+	Context      app_ctx = null;
+	Messenger mService = null;
+    boolean mIsBound;
+    final Messenger mMessenger = new Messenger(new ChkPriceListenHandler());
 	
+    class ChkPriceListenHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+            case ChkPrice.MSG_DB_REFRESHED:
+    			Toast.makeText(PrtfSymbols.this, "Refreshing Data",
+    					Toast.LENGTH_SHORT).show();
+                FillTable();
+                break;
+
+            default:
+                super.handleMessage(msg);
+            }
+        }
+    }
 	private class IdCount {
 		private int	value = 0;
 		private boolean is_set = false;
@@ -184,13 +210,19 @@ public class PrtfSymbols extends Activity implements OnClickListener {
 	private ServiceConnection mConnection = new ServiceConnection() {
 
 		public void onServiceConnected(ComponentName className, IBinder binder) {
-			s = ((ChkPrice.MyBinder) binder).getService();
-			Toast.makeText(PrtfSymbols.this, "Connected",
-					Toast.LENGTH_SHORT).show();
+			mService = new Messenger(binder);
+			try {
+				Message msg = Message.obtain(null, ChkPrice.MSG_REGISTER_CLIENT);
+				msg.replyTo = mMessenger;
+				mService.send(msg);
+			} catch (RemoteException e) {
+				// In this case the service has crashed before we could even do anything with it
+			}
+			MUUDebug.Log(class_nm, "Connected");
 		}
 
 		public void onServiceDisconnected(ComponentName className) {
-			s = null;
+			mService = null;
 		}
 	};
 	@Override
@@ -218,6 +250,7 @@ public class PrtfSymbols extends Activity implements OnClickListener {
 	private void doServiceBind() {
 		bindService(new Intent(this, ChkPrice.class), mConnection,
 				Context.BIND_AUTO_CREATE);
+		mIsBound = true;
 	}
 
 	@Override
@@ -235,11 +268,36 @@ public class PrtfSymbols extends Activity implements OnClickListener {
 			
 		});
 
-		Context app_ctx = getApplicationContext();
+		app_ctx = getApplicationContext();
+		WorkingTime  wrk_time = null;
+
 		PrefMgr.Load(app_ctx);
-		ScheduleServ.Launch(app_ctx);
+
+		if (PrefMgr.isDefined())
+			wrk_time = PrefMgr.WorkingTimeGet(false);
+
+		if (wrk_time != null) {
+			
+			if (PrefMgr.HaveToRunNow (wrk_time)) {
+				if (!ChkPrice.isRunning(app_ctx)) {
+				  wrk_time.start_date = Calendar.getInstance();
+				  wrk_time.start_date.add (Calendar.MINUTE, 2);
+			      ScheduleServ.LaunchAt (app_ctx, wrk_time);
+			    }
+			} else
+			      ScheduleServ.Launch (app_ctx);				
+		}
+
 		if (!FillTable ())
 			obtain_symb ();
+		else {
+			String string = new String("Please Click on stocks to get \nadditional Information...");
+			Toast toast = Toast.makeText(getApplicationContext(), string, Toast.LENGTH_LONG);
+			toast.show();
+		}
+		
+		if (ChkPrice.isRunning(app_ctx))
+		  doServiceBind();
 	}
 	@Override
 	public void onClick(View v) {
@@ -308,11 +366,6 @@ public class PrtfSymbols extends Activity implements OnClickListener {
 			}
 			
 			data_loaded = true;
-			String string = new String("Please Click on stocks to get \nadditional Information...");
-			Context context = getApplicationContext();
-			int duration = Toast.LENGTH_LONG;
-			Toast toast = Toast.makeText(context, string, duration);
-			toast.show();
 		}
 		crsFull.close();
 		dbHelper.close();
@@ -335,12 +388,27 @@ public class PrtfSymbols extends Activity implements OnClickListener {
 		  in_pause = false;
 		}
 	}
+	private void doUnbindService() {
+        if (mIsBound) {
+            // If we have received the service, and hence registered with it, then now is the time to unregister.
+            if (mService != null) {
+                try {
+                    Message msg = Message.obtain(null, ChkPrice.MSG_UNREGISTER_CLIENT);
+                    msg.replyTo = mMessenger;
+                    mService.send(msg);
+                } catch (RemoteException e) {
+                    // There is nothing special we need to do if the service has crashed.
+                }
+            }
+            // Detach our existing connection.
+            unbindService(mConnection);
+            mIsBound = false;
+            MUUDebug.Log(class_nm, "Unbinding.");
+        }
+    }
 	@Override
 	public void onDestroy () {
-		if (s != null) {
-			unbindService (mConnection);
-			s.stopSelf();
-		}
+		doUnbindService ();
 		
 		if (!MUUDebug.REAL_LOAD)
 			DataFileStorage.Release();

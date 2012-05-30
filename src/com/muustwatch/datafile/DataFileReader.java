@@ -51,7 +51,7 @@ public class DataFileReader {
 		
 		if (isOK) {
 			_m_isReader = new InputStreamReader(fIn);
-		    _m_reader = new BufferedReader(_m_isReader);
+		    _m_reader = new BufferedReader(_m_isReader, 1024);
 		} else {
 			_m_isReader = null;
 			_m_reader = null;
