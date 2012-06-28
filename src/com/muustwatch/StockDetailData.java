@@ -150,6 +150,7 @@ public class StockDetailData implements Parcelable {
 	}
 	private String symbol;
 	private MyDouble price;
+	private MyDouble watching_price;
 	private String tr_date;
 	private String tr_time;
 	private Date   trDateTime;    
@@ -170,6 +171,23 @@ public class StockDetailData implements Parcelable {
 	
 	public String getPrice () {	return (price.asString()); }
 	public void setPrice (String in) { price.fromString(in); }
+	
+	public String getWatching () {
+		String ret = null;
+		
+		if (watching_price == null)
+			ret = new String ("");
+		else
+			ret = watching_price.asString();
+		
+		return (ret);
+	}
+	public void setWatching (String in) {
+		if (watching_price == null)
+			watching_price = new MyDouble();
+		
+		watching_price.fromString(in); 
+	}
 	
 	public String getTrDate() {
 		if (trDateTime != null) {
@@ -287,6 +305,7 @@ public class StockDetailData implements Parcelable {
         out.writeString(getLow());
         out.writeString(getPrevClose());
         out.writeString(getVolume());
+        out.writeString(getWatching());
         
         if (ubound != null) {
         	out.writeInt(ubound.getTriggerInt ());
@@ -325,6 +344,7 @@ public class StockDetailData implements Parcelable {
     	setLow (in.readString());
     	setPrevClose (in.readString());
     	setVolume (in.readString());
+    	setWatching(in.readString());
     	
     	if (in.dataAvail() > 0) {
     		triggerON = in.readInt();
@@ -355,6 +375,7 @@ public class StockDetailData implements Parcelable {
     private void InitProperties () {
 		symbol = null;
 		price = new MyDouble();
+		watching_price = null;
 		tr_date = null;
 		tr_time = null;
 		trDateTime = null;    
@@ -413,6 +434,12 @@ public class StockDetailData implements Parcelable {
 			prev_close.copy(in.prev_close);
 			volume = in.volume;
 			
+			if (in.watching_price != null) {
+				if (watching_price == null)
+					watching_price = new MyDouble();
+				
+				watching_price.copy(watching_price);
+			}
 			if (in.ubound != null)
 				ubound = new MyBound(in.ubound);
 			
@@ -438,9 +465,10 @@ public class StockDetailData implements Parcelable {
 				data_item.setLow(quotas_db_crs.getString(8)); // "low"));
 				data_item.setPrevClose(quotas_db_crs.getString(9)); // "prev_close"));
 				data_item.setVolume(quotas_db_crs.getString(10)); // "volume"));
+				data_item.setWatching(quotas_db_crs.getString(11)); // "watching"
 
-				int  triggerON = quotas_db_crs.getInt(11); // u_bound_trig
-				String trg_val = quotas_db_crs.getString(12); // u_bound_val
+				int  triggerON = quotas_db_crs.getInt(12); // u_bound_trig
+				String trg_val = quotas_db_crs.getString(13); // u_bound_val
 
 				if (triggerON == 1) {
 					data_item.setUBound_fromString(trg_val);
@@ -448,8 +476,8 @@ public class StockDetailData implements Parcelable {
 					data_item.setUBoundUndef ();
 				}
 
-				triggerON = quotas_db_crs.getInt(13); // l_bound_trig
-				trg_val = quotas_db_crs.getString(14); // l_bound_val
+				triggerON = quotas_db_crs.getInt(14); // l_bound_trig
+				trg_val = quotas_db_crs.getString(15); // l_bound_val
 
 				if (triggerON == 1) {
 					data_item.setLBound_fromString(trg_val);

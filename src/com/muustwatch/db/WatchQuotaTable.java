@@ -17,24 +17,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 public class WatchQuotaTable {
-		private static final String DATABASE_CREATE = "create table watch_quotas "
-				+ "(_id integer primary key autoincrement, "
-				+ "symbol text not null, " 
-				+ "price text not null, "
-				+ "date text not null, " 
-				+ "time text not null, "
-				+ "change text not null, "
-				+ "open text not null, " 
-				+ "high text not null, " 
-				+ "low text not null, "
-				+ "prev_close text not null, " 
-				+ "volume text not null, " 
-				+ "u_bound_trig integer not null, " 
-				+ "u_bound_val  real not null, " 
-				+ "l_bound_trig integer not null, " 
-				+ "l_bound_val  real not null);";
-
+		
 		public static void onCreate(SQLiteDatabase database) {
+			String DATABASE_CREATE = WatchQuotaDBAdapter.DB_Create_CMD_Get();
 			database.execSQL(DATABASE_CREATE);
 		}
 

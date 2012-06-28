@@ -5,13 +5,9 @@ import java.util.Hashtable;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import android.app.ActivityManager;
-import android.app.ActivityManager.RunningServiceInfo;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -38,11 +34,14 @@ public class ChkPrice extends Service {
 	// Keeps track of all current registered clients.
     ArrayList<Messenger> mClients = new ArrayList<Messenger>();
     
-    int mValue = 0; // Holds last value set by a client.
     static final int MSG_REGISTER_CLIENT = 1;
     static final int MSG_UNREGISTER_CLIENT = 2;
     static final int MSG_DB_REFRESHED = 3;
-    static final int MSG_UNUSED = 4;
+    static final int MSG_UNBIND_ALL_REQUEST = 4;
+    static final int MSG_FORCE_UNBIND = 5;
+    static final int MSG_UNUSED = 6;
+    
+    static final String ReqStringName = "OptCommand";
     
     // Target we publish for clients to send messages to IncomingHandler.
     final Messenger mMessenger = new Messenger(new IncomingHandler()); 
@@ -52,7 +51,24 @@ public class ChkPrice extends Service {
     public IBinder onBind(Intent intent) {
         return mMessenger.getBinder();
     }
-    class IncomingHandler extends Handler { // Handler of incoming messages from clients.
+    
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+    	
+    	int msgID = MSG_UNUSED;
+    	
+    	if (intent != null)
+    	    msgID = intent.getIntExtra(ReqStringName, MSG_UNUSED);
+    	
+    	if (msgID == MSG_UNBIND_ALL_REQUEST) {
+    		doForceUnbindAll ();
+    		MUUDebug.Log(class_nm, "Stop Requested");
+    	}
+    	return START_STICKY;
+    }
+    
+  	// Handler of incoming messages from clients.
+    class IncomingHandler extends Handler { 
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -79,9 +95,11 @@ public class ChkPrice extends Service {
 	private LoadStick	stick = new LoadStick();
 	LimitCrossingNotifier notifier = null;
 	
-	public static boolean isRunning (Context ctx) {
+
+	public static boolean isRunning () {
 		// Absolutely correct implementation
 		// Make sense in general case.
+//		Context ctx;
 //		boolean ret = false;
 //		final String full_cl_name = ChkPrice.class.getName();
 //	    ActivityManager manager = (ActivityManager) ctx.getSystemService(ACTIVITY_SERVICE);
@@ -116,11 +134,11 @@ public class ChkPrice extends Service {
 		}
 		
 	}
-	private void sendMessageToClients () {
+	private void sendMessageToClients (int msgID) {
         for (int i=mClients.size()-1; i>=0; i--) {
             try {
                 // Send data as an Integer
-                mClients.get(i).send(Message.obtain(null, MSG_DB_REFRESHED));
+                mClients.get(i).send(Message.obtain(null, msgID));
 
 
             } catch (RemoteException e) {
@@ -129,6 +147,9 @@ public class ChkPrice extends Service {
             }
         }
     }
+	private void doForceUnbindAll () {
+		sendMessageToClients (MSG_FORCE_UNBIND);
+	}
 
 	private Handler handler = new Handler(){
 		
@@ -150,10 +171,6 @@ public class ChkPrice extends Service {
 					sv_this_stat.LowerToFire = src_data_item.is_LBoundFired();
 					sv_fired_stat.put(src_data_item.getSymbol(), sv_this_stat);
 					
-					// Call below most likely useless: there is no need
-					// update memory object, since it will be anyway release
-					// upon next run() cycle, and all the data gets put
-					// into DB
 					src_data_item.Update(loaded_data_item);
 					
 					if (need_fire.UpperToFire) {
@@ -258,6 +275,9 @@ public class ChkPrice extends Service {
 							}
 						}
 						if (stick.completion) {
+							// There might be a need to refresh (re-get) 'this_item'
+							// since call to GetStockDtl() (after successful stick.wait())
+							// updates value of corresponding dtlList item
 						    Long rowID = dtlList.getDBrowID (idx_in_list_being_proc);
 						    dbHelper.updateWQuota (rowID, this_item);
 						    at_list_one_OK = true;
@@ -269,7 +289,7 @@ public class ChkPrice extends Service {
 					MUUDebug.Log(class_nm, "Loop passed");
 					idx_in_list_being_proc = -1;
 					
-					sendMessageToClients ();
+					sendMessageToClients (MSG_DB_REFRESHED);
 				}
 				crsFull.deactivate();
 				dbHelper.close();				

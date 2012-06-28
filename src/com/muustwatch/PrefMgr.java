@@ -2,8 +2,6 @@ package com.muustwatch;
 
 import java.util.Calendar;
 
-import com.muustwatch.PrefMgr.WorkingTime;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;

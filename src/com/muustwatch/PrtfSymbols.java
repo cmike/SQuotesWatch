@@ -39,6 +39,8 @@ public class PrtfSymbols extends Activity implements OnClickListener {
     protected static final int DTL_REQ_FROM_TBL = 1;
     final static String class_nm = "PrtfSymbols";
     
+    static boolean isUP = false;
+    
     protected static final int ID_ADD = 1000;
 	protected static final int ID_DELETE = 1001;
 	Hashtable<Integer, Integer> idIdxHash = new Hashtable<Integer, Integer>(); // Res. IDs of Table content to Symbol idx 
@@ -50,7 +52,7 @@ public class PrtfSymbols extends Activity implements OnClickListener {
 	TableLayout t = null;
 	Context      app_ctx = null;
 	Messenger mService = null;
-    boolean mIsBound;
+    static boolean mIsBound = false;
     final Messenger mMessenger = new Messenger(new ChkPriceListenHandler());
 	
     class ChkPriceListenHandler extends Handler {
@@ -63,6 +65,9 @@ public class PrtfSymbols extends Activity implements OnClickListener {
                 FillTable();
                 break;
 
+            case ChkPrice.MSG_FORCE_UNBIND:
+            	doUnbindService();
+            	break;
             default:
                 super.handleMessage(msg);
             }
@@ -247,6 +252,10 @@ public class PrtfSymbols extends Activity implements OnClickListener {
 		return (true);
 	}
 	
+	public static boolean isOnTop () {
+		return (isUP);
+	}
+	public static boolean isServBound () { return (mIsBound); } 
 	private void doServiceBind() {
 		bindService(new Intent(this, ChkPrice.class), mConnection,
 				Context.BIND_AUTO_CREATE);
@@ -279,7 +288,7 @@ public class PrtfSymbols extends Activity implements OnClickListener {
 		if (wrk_time != null) {
 			
 			if (PrefMgr.HaveToRunNow (wrk_time)) {
-				if (!ChkPrice.isRunning(app_ctx)) {
+				if (!ChkPrice.isRunning()) {
 				  wrk_time.start_date = Calendar.getInstance();
 				  wrk_time.start_date.add (Calendar.MINUTE, 2);
 			      ScheduleServ.LaunchAt (app_ctx, wrk_time);
@@ -296,7 +305,9 @@ public class PrtfSymbols extends Activity implements OnClickListener {
 			toast.show();
 		}
 		
-		if (ChkPrice.isRunning(app_ctx))
+		isUP = true;
+		
+		if (ChkPrice.isRunning())
 		  doServiceBind();
 	}
 	@Override
@@ -377,6 +388,7 @@ public class PrtfSymbols extends Activity implements OnClickListener {
 	public void onPause () {
 		super.onPause();
 		in_pause = true;
+	    isUP = false;
 	}
 	
 	@Override

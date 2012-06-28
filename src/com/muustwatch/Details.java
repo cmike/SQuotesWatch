@@ -34,6 +34,7 @@ public class Details extends Activity {
 	private CheckBox chb_txt1;
 	private EditText LboundVal;
 	private CheckBox chb_txt2;
+	private EditText WatchingVal;
 
 
 
@@ -110,6 +111,7 @@ public class Details extends Activity {
 		chb_txt1 = new CheckBox (this);
 		LboundVal = new EditText(this);
 		chb_txt2 = new CheckBox (this);
+		WatchingVal = new EditText(this);
 		
 		if (allow_add_to_button) {
 			ToPortfolioButton = new Button(this);
@@ -204,6 +206,22 @@ public class Details extends Activity {
 			tv2.setTextSize(14);
 		}
 
+		// Watching
+		tr = new TableRow(this);
+		
+		tv1 = new TextView(this);
+		tv1.setText("Watching Price");
+		tv1.setTextSize(13);
+		
+		WatchingVal.setText(stock_detail.getWatching());
+		WatchingVal.setTextSize(14);
+		WatchingVal.setSingleLine(true);
+		
+		tr.addView(tv1);
+		tr.addView(WatchingVal);
+		
+		table.addView(tr);
+		// End Watching
 		tr = new TableRow(this);
 
 		

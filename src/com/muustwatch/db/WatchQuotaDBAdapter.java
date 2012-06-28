@@ -40,6 +40,7 @@ public class WatchQuotaDBAdapter {
 		public static final String KEY_LBOUND_TRG = "l_bound_trig";
 		public static final String KEY_LBOUND_VAL = "l_bound_val";
 		public static final String KEY_VOLUME = "volume";
+		public static final String KEY_WATCHING = "watching";
 		
 		public static final String[] Columns = 
 		  { 
@@ -54,13 +55,44 @@ public class WatchQuotaDBAdapter {
 			KEY_LOW,
 			KEY_PREVCLOSE,
 			KEY_VOLUME,
+			KEY_WATCHING,
 			KEY_UBOUND_TRG,
 			KEY_UBOUND_VAL,
 			KEY_LBOUND_TRG,
 			KEY_LBOUND_VAL
 		  };
+		public static final String[] FieldDescriptors =
+			{
+			"integer primary key autoincrement",
+			"text not null", 
+			"text not null",
+			"text not null", 
+			"text not null",
+			"text not null",
+			"text not null", 
+			"text not null", 
+			"text not null",
+			"text not null", 
+			"text not null", 
+			"text not null", 
+			"integer not null", 
+			"real not null", 
+			"integer not null", 
+			"real not null"
+			};
 		
 		private static final String DB_TABLE = "watch_quotas";
+		public static String DB_Create_CMD_Get () {
+			String ret = "create table " + DB_TABLE	+ " ("
+					       + Columns[0] + " " + FieldDescriptors[0];
+			
+			for (int i = 1; i < Columns.length; i++) {
+				ret = ret + ", " + Columns[i] + " " + FieldDescriptors[i];
+			}
+			ret = ret + ");";
+			
+			return (ret);
+		}
 		private Context context;
 		private SQLiteDatabase db;
 		private WatchQuotaDBHelper dbHelper;
@@ -199,6 +231,7 @@ public class WatchQuotaDBAdapter {
 		values.put(KEY_LOW, data_item.getLow());
 		values.put(KEY_PREVCLOSE, data_item.getPrevClose());
 		values.put(KEY_VOLUME, data_item.getVolume());
+		values.put(KEY_WATCHING, data_item.getWatching());
 
 		values.put (KEY_UBOUND_TRG, data_item.getIntUBoundTrig());
 		values.put (KEY_UBOUND_VAL, data_item.getDblUBoundVal());

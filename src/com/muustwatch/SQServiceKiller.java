@@ -17,13 +17,25 @@ public class SQServiceKiller extends BroadcastReceiver {
 	}
 
 	public static boolean Kill (Context in_context) {
+		
+	    
+		boolean ret = ChkPrice.isRunning();		
 		Intent serv_intent = new Intent(in_context, ChkPrice.class);
-		boolean ret = in_context.getApplicationContext().stopService(serv_intent);
+		if (ret) {
+			
+			// TODO wait until stopped;
+
+			if (PrtfSymbols.isServBound()) {
+			serv_intent.putExtra(ChkPrice.ReqStringName, ChkPrice.MSG_UNBIND_ALL_REQUEST);
+			in_context.getApplicationContext().startService(serv_intent);
+			}
+			in_context.getApplicationContext().stopService(serv_intent);
+		}
 		
 		if (ret) {
-			MUUDebug.Log(cl_nm, "Service stopped");
+			MUUDebug.Log(cl_nm, "Service stop requested");
 		} else {
-			MUUDebug.Log(cl_nm, "Service was not stopped");
+			MUUDebug.Log(cl_nm, "Service inactive");
 		}
 		
 		return (ret);
