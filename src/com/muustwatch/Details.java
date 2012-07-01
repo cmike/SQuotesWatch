@@ -38,7 +38,7 @@ public class Details extends Activity {
 
 
 
-	private void UpdateBounds () {
+	private void UpdateData () {
 		if (chb_txt2.isChecked())
 			stock_detail.setLBound_fromString(LboundVal.getText().toString());
 		else
@@ -48,6 +48,8 @@ public class Details extends Activity {
 			stock_detail.setUBound_fromString(UboundVal.getText().toString());
 		else
 			stock_detail.setUBoundUndef();
+		
+		stock_detail.setWatching(WatchingVal.getText().toString());
 	}
 	@Override
 	public void finish() {
@@ -122,7 +124,7 @@ public class Details extends Activity {
 
 				@Override
 				public void onClick(View v) {
-					UpdateBounds ();
+					UpdateData ();
 					dbHelper.createWQuota(stock_detail);
 					
 					ret_data = new Intent ();
@@ -142,7 +144,7 @@ public class Details extends Activity {
 				@Override
 				public void onClick(View v) {
 					StockDetailData orig = ItemInDB.getData();
-					UpdateBounds ();
+					UpdateData ();
 					orig.Update(stock_detail);
 					dbHelper.updateWQuota(ItemInDB.getRowIdx(), orig);
 					finish();

@@ -438,7 +438,7 @@ public class StockDetailData implements Parcelable {
 				if (watching_price == null)
 					watching_price = new MyDouble();
 				
-				watching_price.copy(watching_price);
+				watching_price.copy(in.watching_price);
 			}
 			if (in.ubound != null)
 				ubound = new MyBound(in.ubound);
