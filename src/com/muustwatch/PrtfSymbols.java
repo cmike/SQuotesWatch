@@ -100,22 +100,13 @@ public class PrtfSymbols extends Activity implements OnClickListener {
 		t.setColumnStretchable(1, true);
         t.setColumnStretchable(2, true);
         t.setColumnStretchable(3, true);
-        // Let us set the headings.
+        
         TableRow tr = new TableRow(this);
-        for(int loop=0;loop<5;loop++)
-        {
+		for (String clmnID : DtlColumnsMgr.AllColumnIDs) {
 	        String name = new String();
-        	switch(loop)
-	        {
-	        case 0: name="STOCK\nname";break;
-	        case 1: name="Date\nand Time";break;
-	        case 2: name="Stock\nPrice";break;
-	        case 3: name="Peviously\nClosed";break;
-	        case 4: name="Day's\ngain";break;
-	       
-	        }
-        	
-        	
+	        
+	        name = DtlColumnsMgr.getTitle(clmnID);
+			
 		  	TextView tv = new TextView(this);
 		  	tv.setText(name);
 		  	tv.setTextSize(14);
@@ -127,55 +118,36 @@ public class PrtfSymbols extends Activity implements OnClickListener {
 		
 	}
 	
+	private void OneRowCellAdd (TableRow tr, IdCount idgen, 
+			int item_idx, Hashtable<Integer, Integer> idIdxHash, 
+			StockDetailData data_item, String clmnID) {
+		
+		TVwithCtxInfo tv = new TVwithCtxInfo(this);
+
+		String cell_txt = DtlColumnsMgr.getText(clmnID, data_item); 
+		float  txt_size = DtlColumnsMgr.get_tx_size(clmnID);
+		
+		tv.setText(cell_txt);
+		// Let us assign an ID to this text box and store relation in the hash
+		// table
+		tv.setId(idgen.get());
+		idIdxHash.put(new Integer(idgen.get()), new Integer (item_idx));
+		tv.setOnClickListener(this);
+		registerForContextMenu(tv);
+		tv.setTextSize(txt_size);
+		tr.addView(tv);
+	}
 	private void TableOneRowAdd(TableLayout t, IdCount idgen, boolean toggle,
 			int item_idx, Hashtable<Integer, Integer> idIdxHash, StockDetailData data_item) {
 		TableRow tr1 = new TableRow(this);
-		
-		TVwithCtxInfo tv1 = new TVwithCtxInfo(this);
 
-		tv1.setText(data_item.getSymbol());
-		// Let us assign an ID to this text box and store relation in the hash
-		// table
-		tv1.setId(idgen.get());
-		idIdxHash.put(new Integer(idgen.get()), new Integer (item_idx));
-		tv1.setOnClickListener(this);
-		registerForContextMenu(tv1);
-
-		TVwithCtxInfo tv2 = new TVwithCtxInfo(this);
-		tv2.setText(data_item.getTrDate() + "  " + data_item.getTrTime());
-		tv2.setId(idgen.increment());
-		idIdxHash.put(new Integer(idgen.get()), new Integer (item_idx));
-		tv2.setOnClickListener(this);
-		registerForContextMenu(tv2);
-
-		TVwithCtxInfo tv3 = new TVwithCtxInfo(this);
-		tv3.setText(data_item.getPrice());
-		tv3.setId(idgen.increment());
-		idIdxHash.put(new Integer(idgen.get()), new Integer (item_idx));
-		tv3.setOnClickListener(this);
-		registerForContextMenu(tv3);
-
-		TVwithCtxInfo tv4 = new TVwithCtxInfo(this);
-		tv4.setText(data_item.getPrevClose());
-		tv4.setId(idgen.increment());
-		idIdxHash.put(new Integer(idgen.get()), new Integer (item_idx));
-		tv4.setOnClickListener(this);
-		registerForContextMenu(tv4);
-
-		TVwithCtxInfo tv5 = new TVwithCtxInfo(this);
-		tv5.setText (data_item.getChange());
-		tv5.setId(idgen.increment());
-		idIdxHash.put(new Integer(idgen.get()), new Integer (item_idx));
-		tv5.setOnClickListener(this);
-		registerForContextMenu(tv5);
+		for (String clmnID : DtlColumnsMgr.AllColumnIDs) {
+			OneRowCellAdd (tr1, idgen, item_idx, idIdxHash, data_item, clmnID);
+			
+		}
 
 		idgen.increment();
 		
-		tr1.addView(tv1);
-		tr1.addView(tv2);
-		tr1.addView(tv3);
-		tr1.addView(tv4);
-		tr1.addView(tv5);
 		t.addView(tr1);
 		if (toggle == false) {
 			tr1.setBackgroundColor(Color.argb(90, 102, 0, 0));
@@ -184,14 +156,6 @@ public class PrtfSymbols extends Activity implements OnClickListener {
 			tr1.setBackgroundColor(Color.argb(140, 102, 0, 0));
 			toggle = false;
 		}
-
-		tv1.setTextSize(14);
-		tv2.setTextSize(11);
-		tv3.setTextSize(14);
-		tv4.setTextSize(14);
-		tv5.setTextSize(14);
-
-		
 	}
 	private void obtain_symb () {
 		Intent intent = new Intent(PrtfSymbols.this, YahooSymbolSearch.class);

@@ -232,6 +232,7 @@ public class StockDetailData implements Parcelable {
 		}
 		return (tr_time); 
 	}
+	public String getTrDateTime () { return (getTrDate() + "  " + getTrTime()); }
 	public void setTrTime (String in) { 
 		tr_time = in; 
 		if (tr_date != null && tr_date.length() > 0) {
