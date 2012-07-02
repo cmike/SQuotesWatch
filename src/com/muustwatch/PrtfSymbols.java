@@ -28,6 +28,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.HorizontalScrollView;
 import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -49,6 +50,7 @@ public class PrtfSymbols extends Activity implements OnClickListener {
 	StockDtlList dtlList;
 	boolean  in_pause = false;
 	ScrollView sv = null;
+	HorizontalScrollView hsv = null;
 	TableLayout t = null;
 	Context      app_ctx = null;
 	Messenger mService = null;
@@ -96,18 +98,18 @@ public class PrtfSymbols extends Activity implements OnClickListener {
 		}
 	}
 	public void TableHeadersSetup (TableLayout t) {
-		t.setColumnStretchable(0, true);
-		t.setColumnStretchable(1, true);
-        t.setColumnStretchable(2, true);
-        t.setColumnStretchable(3, true);
         
+        int clmn_idx = 0;
         TableRow tr = new TableRow(this);
 		for (String clmnID : DtlColumnsMgr.AllColumnIDs) {
 	        String name = new String();
 	        
 	        name = DtlColumnsMgr.getTitle(clmnID);
 			
-		  	TextView tv = new TextView(this);
+			t.setColumnStretchable(clmn_idx, true);
+			clmn_idx++;
+
+			TextView tv = new TextView(this);
 		  	tv.setText(name);
 		  	tv.setTextSize(14);
 		  	tr.addView(tv);
@@ -135,6 +137,7 @@ public class PrtfSymbols extends Activity implements OnClickListener {
 		tv.setOnClickListener(this);
 		registerForContextMenu(tv);
 		tv.setTextSize(txt_size);
+		tv.setPadding(4, 1, 4, 1);
 		tr.addView(tv);
 	}
 	private void TableOneRowAdd(TableLayout t, IdCount idgen, boolean toggle,
@@ -231,6 +234,7 @@ public class PrtfSymbols extends Activity implements OnClickListener {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.symbols);
 		sv = (ScrollView)findViewById(R.id.baseScroll);
+		hsv = (HorizontalScrollView)findViewById(R.id.HorizScroll);
 		t = (TableLayout)findViewById(R.id.baseTable);
 		t.setOnClickListener(new OnClickListener () {
 
@@ -316,7 +320,8 @@ public class PrtfSymbols extends Activity implements OnClickListener {
 		int     item_idx = 0;
 		boolean data_loaded = false;
 
-		sv.setBackgroundColor(Color.rgb(0,0, 0));
+//		sv.setBackgroundColor(Color.rgb(0,0, 0));
+		hsv.setBackgroundColor(Color.rgb(0,0, 0));
 
 		t.setBackgroundColor(Color.rgb(0,0, 0));
 		t.removeAllViews();
